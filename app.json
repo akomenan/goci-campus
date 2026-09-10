@@ -37,12 +37,13 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "PROTTECTOR a besoin d’accéder à tes photos pour la photo de profil."
+          "photosPermission": "PROTTECTOR a besoin d\u2019acc\u00e9der \u00e0 tes photos pour la photo de profil."
         }
       ]
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "baseUrl": "/prottector"
     }
   }
 }
