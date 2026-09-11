@@ -101,7 +101,7 @@ export default function PublierLogementScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <Text style={styles.intro}>
           Publiez une chambre, un studio ou une colocation à Abidjan. L’annonce reste sur cet
-          appareil (PROTTECTOR).
+          appareil (Goci Campus).
         </Text>
 
         <View style={styles.card}>

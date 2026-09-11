@@ -106,7 +106,7 @@ export async function addUserOffre(input: PublishOffreInput): Promise<Offre> {
     quartier,
     description: input.description.trim(),
     sourceUrl: '',
-    sourceName: 'Annonce locale PROTTECTOR',
+    sourceName: 'Annonce locale Goci Campus',
     remuneration: input.remuneration?.trim() || undefined,
     duree: input.duree?.trim() || undefined,
     contactEmail: input.contactEmail?.trim() || undefined,

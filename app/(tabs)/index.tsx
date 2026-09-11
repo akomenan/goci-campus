@@ -77,7 +77,7 @@ export default function AccueilScreen() {
         ))}
       </View>
 
-      <Text style={styles.footer}>PROTTECTOR · Côte d&apos;Ivoire · Prototype MVP</Text>
+      <Text style={styles.footer}>Goci Campus · Côte d&apos;Ivoire · Prototype MVP</Text>
     </ScrollView>
   );
 }

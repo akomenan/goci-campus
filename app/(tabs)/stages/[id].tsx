@@ -144,7 +144,7 @@ export default function StageDetailScreen() {
   const onReport = () => {
     Alert.alert(
       'Signaler cette offre',
-      'Confirmez-vous le signalement ? L’équipe PROTTECTOR pourra la vérifier.',
+      'Confirmez-vous le signalement ? L’équipe Goci Campus pourra la vérifier.',
       [
         { text: 'Annuler', style: 'cancel' },
         {

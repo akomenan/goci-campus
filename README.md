@@ -1,4 +1,4 @@
-# PROTTECTOR
+# Goci Campus
 
 Prototype MVP (Expo / React Native / TypeScript) — super-app étudiante pour la Côte d'Ivoire.
 

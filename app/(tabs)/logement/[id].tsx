@@ -94,7 +94,7 @@ export default function LogementDetailScreen() {
   const onReport = () => {
     Alert.alert(
       'Signaler cette annonce',
-      'Confirmez-vous le signalement ? L’équipe PROTTECTOR pourra la vérifier.',
+      'Confirmez-vous le signalement ? L’équipe Goci Campus pourra la vérifier.',
       [
         { text: 'Annuler', style: 'cancel' },
         {
@@ -319,7 +319,7 @@ export default function LogementDetailScreen() {
 
       <Text style={styles.disclaimer}>
         Annonces agrégées — vérifier et négocier sur la source. Attention arnaques / frais de
-        visite. PROTTECTOR n’est pas l’annonceur.
+        visite. Goci Campus n’est pas l’annonceur.
       </Text>
     </ScrollView>
   );

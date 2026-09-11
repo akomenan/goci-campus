@@ -88,7 +88,7 @@ export default function PostulerScreen() {
       `E-mail : ${email.trim()}`,
       tel.trim() ? `Tél : ${tel.trim()}` : null,
       item.sourceUrl ? `Offre source : ${item.sourceUrl}` : null,
-      'Envoyé via PROTTECTOR',
+      'Envoyé via Goci Campus',
     ]
       .filter(Boolean)
       .join('\n');

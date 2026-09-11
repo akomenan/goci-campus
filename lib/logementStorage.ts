@@ -84,7 +84,7 @@ export async function addUserLogement(input: PublishInput): Promise<Logement> {
     contactNom: input.contactNom.trim() || 'Annonceur',
     contactTel: input.contactTel.trim(),
     whatsapp: input.contactTel.trim(),
-    sourceName: 'PROTTECTOR (local)',
+    sourceName: 'Goci Campus (local)',
     disponible: true,
     verifie: false,
     mine: true,

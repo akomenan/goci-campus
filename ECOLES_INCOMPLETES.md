@@ -1,4 +1,4 @@
-# Écoles incomplètes — PROTTECTOR
+# Écoles incomplètes — Goci Campus
 
 _Généré automatiquement — 58 établissements au total, dont 9 encore incomplets._
 
