@@ -7,9 +7,10 @@ import React, {
   useState,
 } from 'react';
 import type { StudentProfile, UserRole } from '@/data/profile';
-import { resolveRole } from '@/data/profile';
+import { allocateUsername, buildBaseUsername, resolveRole } from '@/data/profile';
 import {
   AuthUser,
+  ensureSchoolerUsernames,
   loadSessionUserId,
   loadUsers,
   matchesLogin,
@@ -52,13 +53,16 @@ export type ProfileUpdateInput = Partial<
     StudentProfile,
     | 'photoUri'
     | 'biographie'
-    | 'parcours'
-    | 'ambitions'
+    | 'centresInteret'
     | 'ville'
     | 'universite'
     | 'filiere'
     | 'niveau'
     | 'email'
+    | 'telephone'
+    | 'prenom'
+    | 'nom'
+    | 'username'
     | 'obsoActivite'
   >
 >;
@@ -70,6 +74,8 @@ type AuthContextValue = {
   signUp: (input: SignUpInput) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (patch: ProfileUpdateInput) => Promise<void>;
+  changePassword: (current: string, next: string) => Promise<void>;
+  closeAccount: (password: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -99,7 +105,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const [users, sessionId] = await Promise.all([loadUsers(), loadSessionUserId()]);
+        const [loaded, sessionId] = await Promise.all([loadUsers(), loadSessionUserId()]);
+        const users = await ensureSchoolerUsernames(loaded);
         if (cancelled) return;
         if (sessionId) {
           const found = users.find((u) => u.id === sessionId);
@@ -123,9 +130,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (password.length < 4) {
       throw new Error('Le mot de passe doit avoir au moins 4 caractères.');
     }
-    const users = await loadUsers();
+    const users = await ensureSchoolerUsernames(await loadUsers());
     const found = users.find((u) => matchesLogin(u, trimmedLogin) && u.password === password);
-    if (!found) throw new Error('Identifiants incorrects. Vérifie et réessaie.');
+    if (!found) throw new Error('Identifiants incorrects.');
     await saveSessionUserId(found.id);
     setUser(publicUser(found));
   }, []);
@@ -148,6 +155,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await assertUniqueContact(users, telephone, email);
 
     const role: UserRole = input.role === 'obso' ? 'obso' : 'schooler';
+    let username: string | undefined;
+    if (role === 'schooler') {
+      const taken = new Set(
+        users.map((u) => (u.username || '').toLowerCase()).filter(Boolean),
+      );
+      username = allocateUsername(buildBaseUsername(prenom, nom), taken);
+    }
+
     const newUser: AuthUser = {
       id: makeId(),
       role,
@@ -156,6 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       telephone,
       email,
       password,
+      username,
       ville: (input.ville || '').trim(),
       ...(role === 'schooler'
         ? {
@@ -185,10 +201,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const idx = users.findIndex((u) => u.id === user.id);
       if (idx < 0) throw new Error('Compte introuvable.');
       const current = users[idx];
+
+      if (patch.username !== undefined) {
+        const nextName = patch.username.trim();
+        if (!nextName) throw new Error('Nom d’utilisateur vide.');
+        const clash = users.some(
+          (u) =>
+            u.id !== user.id &&
+            (u.username || '').toLowerCase() === nextName.toLowerCase(),
+        );
+        if (clash) throw new Error('Ce nom d’utilisateur est déjà pris.');
+        patch = { ...patch, username: nextName };
+      }
+
       const next: AuthUser = {
         ...current,
         ...patch,
         email: patch.email !== undefined ? patch.email.trim() : current.email,
+        telephone:
+          patch.telephone !== undefined ? patch.telephone.trim() : current.telephone,
       };
       const updated = [...users];
       updated[idx] = next;
@@ -198,9 +229,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [user],
   );
 
+  const changePassword = useCallback(
+    async (currentPass: string, nextPass: string) => {
+      if (!user) throw new Error('Non connecté.');
+      if (nextPass.length < 4) throw new Error('Nouveau mot de passe trop court.');
+      const users = await loadUsers();
+      const idx = users.findIndex((u) => u.id === user.id);
+      if (idx < 0) throw new Error('Compte introuvable.');
+      if (users[idx].password !== currentPass) {
+        throw new Error('Mot de passe actuel incorrect.');
+      }
+      const updated = [...users];
+      updated[idx] = { ...users[idx], password: nextPass };
+      await saveUsers(updated);
+    },
+    [user],
+  );
+
+  const closeAccount = useCallback(
+    async (password: string) => {
+      if (!user) throw new Error('Non connecté.');
+      const users = await loadUsers();
+      const found = users.find((u) => u.id === user.id);
+      if (!found || found.password !== password) {
+        throw new Error('Mot de passe incorrect.');
+      }
+      await saveUsers(users.filter((u) => u.id !== user.id));
+      await saveSessionUserId(null);
+      setUser(null);
+    },
+    [user],
+  );
+
   const value = useMemo(
-    () => ({ user, loading, signIn, signUp, signOut, updateProfile }),
-    [user, loading, signIn, signUp, signOut, updateProfile],
+    () => ({
+      user,
+      loading,
+      signIn,
+      signUp,
+      signOut,
+      updateProfile,
+      changePassword,
+      closeAccount,
+    }),
+    [user, loading, signIn, signUp, signOut, updateProfile, changePassword, closeAccount],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

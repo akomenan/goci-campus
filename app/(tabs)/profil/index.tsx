@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -9,7 +8,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { Theme } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
@@ -17,9 +15,8 @@ import { resolveRole, roleBadge } from '@/data/profile';
 import { GlassButton } from '@/components/GlassButton';
 
 export default function ProfilScreen() {
-  const { user, signOut, updateProfile } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-  const [busy, setBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (!user) {
@@ -33,60 +30,26 @@ export default function ProfilScreen() {
   const isObso = resolveRole(user) === 'obso';
   const badge = roleBadge(user);
   const initials = `${user.prenom?.[0] ?? ''}${user.nom?.[0] ?? ''}`.toUpperCase() || '?';
-
-  async function onSignOut() {
-    setBusy(true);
-    try {
-      await signOut();
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function onPickPhoto() {
-    try {
-      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!perm.granted) {
-        Alert.alert('Permission requise', 'Autorise l’accès à la galerie.');
-        return;
-      }
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-      if (result.canceled || !result.assets?.[0]?.uri) return;
-      await updateProfile({ photoUri: result.assets[0].uri });
-    } catch (e) {
-      Alert.alert('Erreur', e instanceof Error ? e.message : 'Photo impossible.');
-    }
-  }
+  const displayId = user.username || user.id;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.heroCard}>
-        <Pressable onPress={onPickPhoto} style={styles.avatarPress}>
-          {user.photoUri ? (
-            <Image source={{ uri: user.photoUri }} style={styles.photo} />
-          ) : (
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials}</Text>
-            </View>
-          )}
-        </Pressable>
+        {user.photoUri ? (
+          <Image source={{ uri: user.photoUri }} style={styles.photo} />
+        ) : (
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials}</Text>
+          </View>
+        )}
         <Text style={styles.name}>
           {user.prenom} {user.nom}
         </Text>
         <View style={[styles.badge, isObso ? styles.badgeObso : styles.badgeSchooler]}>
           <Text style={[styles.badgeText, isObso && styles.badgeTextObso]}>{badge}</Text>
         </View>
-        <Text style={styles.userId}>ID : {user.id}</Text>
-        <Text style={styles.idHint}>
-          {isObso
-            ? 'Les SCHOOLER peuvent te retrouver avec cet ID.'
-            : 'Partage cet ID pour que d’autres SCHOOLER te retrouvent.'}
-        </Text>
+        {!isObso ? <Text style={styles.userId}>{displayId}</Text> : null}
+        {user.biographie ? <Text style={styles.bio}>{user.biographie}</Text> : null}
       </View>
 
       {isObso ? (
@@ -133,7 +96,6 @@ export default function ProfilScreen() {
           />
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Infos OBSO</Text>
             <Text style={styles.infoLine}>Tél. {user.telephone}</Text>
             {user.email ? <Text style={styles.infoLine}>{user.email}</Text> : null}
             {user.ville ? <Text style={styles.infoLine}>{user.ville}</Text> : null}
@@ -144,27 +106,25 @@ export default function ProfilScreen() {
         </View>
       ) : (
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Infos SCHOOLER</Text>
-          <Text style={styles.infoLine}>Tél. {user.telephone}</Text>
-          {user.email ? <Text style={styles.infoLine}>{user.email}</Text> : null}
-          {user.ville ? <Text style={styles.infoLine}>Ville : {user.ville}</Text> : null}
           {user.universite ? (
             <Text style={styles.infoLine}>École : {user.universite}</Text>
           ) : null}
-          {user.filiere ? <Text style={styles.infoLine}>Filière : {user.filiere}</Text> : null}
           {user.niveau ? <Text style={styles.infoLine}>Niveau : {user.niveau}</Text> : null}
-          <Text style={styles.schoolerNote}>
-            Tu viens pour trouver école, logement, stages/jobs, lire les briefs, et te
-            retrouver entre SCHOOLER via votre ID.
-          </Text>
+          <Text style={styles.infoLine}>Numéro : {user.telephone}</Text>
+          {user.email ? <Text style={styles.infoLine}>Courriel : {user.email}</Text> : null}
+          {user.ville ? (
+            <Text style={styles.infoLine}>Ville / Commune : {user.ville}</Text>
+          ) : null}
+          {user.centresInteret ? (
+            <Text style={styles.infoLine}>Centres d’intérêt : {user.centresInteret}</Text>
+          ) : null}
         </View>
       )}
 
       <GlassButton
-        label="Déconnexion"
-        variant="danger"
-        onPress={onSignOut}
-        busy={busy}
+        label="Paramètres"
+        variant="secondary"
+        onPress={() => router.push('/(tabs)/profil/parametres')}
         style={{ marginTop: 8 }}
       />
     </ScrollView>
@@ -182,7 +142,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Theme.spacing.md,
   },
-  avatarPress: { alignItems: 'center' },
   avatar: {
     width: 84,
     height: 84,
@@ -207,16 +166,16 @@ const styles = StyleSheet.create({
   badgeTextObso: { color: Theme.colors.orange },
   userId: {
     marginTop: 10,
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '700',
     color: Theme.colors.text,
   },
-  idHint: {
-    marginTop: 4,
-    fontSize: 12,
+  bio: {
+    marginTop: 10,
+    fontSize: 13,
     color: Theme.colors.muted,
     textAlign: 'center',
-    lineHeight: 17,
+    lineHeight: 18,
   },
   obsoBlock: { marginBottom: Theme.spacing.md },
   dropdown: {
@@ -240,13 +199,5 @@ const styles = StyleSheet.create({
     marginTop: Theme.spacing.md,
     marginBottom: Theme.spacing.md,
   },
-  infoTitle: { fontWeight: '800', fontSize: 16, marginBottom: 8, color: Theme.colors.text },
-  infoLine: { color: Theme.colors.text, marginBottom: 4, fontSize: 14 },
-  schoolerNote: {
-    marginTop: 12,
-    color: Theme.colors.muted,
-    fontSize: 13,
-    lineHeight: 19,
-  },
+  infoLine: { color: Theme.colors.text, marginBottom: 6, fontSize: 14 },
 });
-

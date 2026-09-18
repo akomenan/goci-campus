@@ -1,6 +1,5 @@
 export type UserRole = 'schooler' | 'obso';
 
-/** Legacy roles still present in local storage */
 type LegacyRole = 'etudiant' | 'visiteur';
 
 export type StudentProfile = {
@@ -8,22 +7,22 @@ export type StudentProfile = {
   nom: string;
   telephone: string;
   email: string;
-  /** schooler | obso — legacy etudiant/visiteur migrated via resolveRole */
   role?: UserRole | LegacyRole;
+  /** Public SCHOOLER handle, e.g. AmosKomenan */
+  username?: string;
   ville?: string;
   universite?: string;
   filiere?: string;
   niveau?: string;
   photoUri?: string;
   biographie?: string;
-  parcours?: string;
-  ambitions?: string;
-  /** Optional free label for OBSO (ex: propriétaire, recruteur) */
+  centresInteret?: string;
   obsoActivite?: string;
-  /** @deprecated legacy */
   visiteurType?: string;
   anneeBac?: string;
   recherches?: string[];
+  parcours?: string;
+  ambitions?: string;
 };
 
 export const NIVEAUX = ['Collège', 'Lycée', 'L1', 'L2', 'L3', 'M1', 'M2', 'Autre'] as const;
@@ -39,7 +38,31 @@ export function roleBadge(user: StudentProfile | null | undefined): 'SCHOOLER' |
   return resolveRole(user) === 'obso' ? 'OBSO' : 'SCHOOLER';
 }
 
-/** @deprecated use roleBadge */
 export function roleLabel(user: StudentProfile | null | undefined): string {
   return roleBadge(user);
+}
+
+function cap(word: string): string {
+  const w = word.trim();
+  if (!w) return '';
+  return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+}
+
+/** Jean + Kouadio → JeanKouadio ; Amos + Komenan … → AmosKomenan */
+export function buildBaseUsername(prenom: string, nom: string): string {
+  const first = cap((prenom || '').trim().split(/\s+/).filter(Boolean)[0] || '');
+  const family = cap((nom || '').trim().split(/\s+/).filter(Boolean)[0] || '');
+  const base = `${first}${family}`.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '');
+  return base || 'Schooler';
+}
+
+export function allocateUsername(base: string, taken: Set<string>): string {
+  const key = (s: string) => s.toLowerCase();
+  if (!taken.has(key(base))) return base;
+  for (let i = 0; i < 40; i++) {
+    const digits = String(Math.floor(1000 + Math.random() * 9000));
+    const candidate = `${digits}${base}`;
+    if (!taken.has(key(candidate))) return candidate;
+  }
+  return `${Date.now().toString().slice(-4)}${base}`;
 }

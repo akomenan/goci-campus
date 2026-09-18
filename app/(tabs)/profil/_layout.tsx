@@ -12,6 +12,7 @@ export default function ProfilLayout() {
         headerShadowVisible: false,
       }}>
       <Stack.Screen name="index" options={{ title: 'Mon profil' }} />
+      <Stack.Screen name="parametres" options={{ title: 'Paramètres' }} />
       <Stack.Screen name="mes-annonces" options={{ title: 'Mes annonces' }} />
       <Stack.Screen name="publier-logement" options={{ title: 'Publier un logement' }} />
       <Stack.Screen name="publier-stage" options={{ title: 'Publier stage / job' }} />
