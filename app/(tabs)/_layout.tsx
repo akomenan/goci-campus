@@ -28,8 +28,8 @@ export default function TabLayout() {
         tabBarActiveTintColor: Theme.colors.primary,
         tabBarInactiveTintColor: Theme.colors.muted,
         tabBarStyle: {
-          backgroundColor: Theme.colors.card,
-          borderTopColor: Theme.colors.border,
+          backgroundColor: 'rgba(255,255,255,0.92)',
+          borderTopColor: 'rgba(15,23,42,0.06)',
           height: 60,
           paddingBottom: 8,
           paddingTop: 6,
@@ -95,6 +95,7 @@ export default function TabLayout() {
         name="profil"
         options={{
           title: 'Profil',
+          headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name="person-outline"
@@ -103,7 +104,6 @@ export default function TabLayout() {
               focused={focused}
             />
           ),
-          headerTitle: 'Mon profil',
         }}
       />
     </Tabs>

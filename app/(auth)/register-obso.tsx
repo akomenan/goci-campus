@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,10 +10,9 @@ import {
 } from 'react-native';
 import { Theme } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { NIVEAUX } from '@/data/profile';
 import { GlassButton } from '@/components/GlassButton';
 
-export default function RegisterSchoolerScreen() {
+export default function RegisterObsoScreen() {
   const { signUp } = useAuth();
   const [prenom, setPrenom] = useState('');
   const [nom, setNom] = useState('');
@@ -22,18 +20,12 @@ export default function RegisterSchoolerScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [ville, setVille] = useState('');
-  const [universite, setUniversite] = useState('');
-  const [filiere, setFiliere] = useState('');
-  const [niveau, setNiveau] = useState('');
+  const [obsoActivite, setObsoActivite] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const canSubmit = useMemo(
-    () =>
-      prenom.trim() &&
-      nom.trim() &&
-      telephone.trim() &&
-      password.length >= 4,
+    () => prenom.trim() && nom.trim() && telephone.trim() && password.length >= 4,
     [prenom, nom, telephone, password],
   );
 
@@ -42,16 +34,14 @@ export default function RegisterSchoolerScreen() {
     setBusy(true);
     try {
       await signUp({
-        role: 'schooler',
+        role: 'obso',
         prenom,
         nom,
         telephone,
         email,
         password,
         ville,
-        universite,
-        filiere,
-        niveau,
+        obsoActivite,
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Inscription impossible.');
@@ -66,56 +56,53 @@ export default function RegisterSchoolerScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>SCHOOLER</Text>
+          <Text style={styles.badgeText}>OBSO</Text>
         </View>
-        <Text style={styles.title}>Créer un compte SCHOOLER</Text>
-        <Text style={styles.sub}>Pour élèves et étudiants</Text>
+        <Text style={styles.title}>Créer un compte OBSO</Text>
+        <Text style={styles.sub}>
+          Observateur — visiteurs, particuliers, entreprises, propriétaires…
+        </Text>
 
         <View style={styles.card}>
-          <Field label="Prénom *" value={prenom} onChangeText={setPrenom} />
-          <Field label="Nom *" value={nom} onChangeText={setNom} />
-          <Field
-            label="Téléphone *"
+          <Text style={styles.label}>Prénom *</Text>
+          <TextInput style={styles.input} value={prenom} onChangeText={setPrenom} />
+          <Text style={styles.label}>Nom *</Text>
+          <TextInput style={styles.input} value={nom} onChangeText={setNom} />
+          <Text style={styles.label}>Téléphone *</Text>
+          <TextInput
+            style={styles.input}
             value={telephone}
             onChangeText={setTelephone}
             keyboardType="phone-pad"
           />
-          <Field
-            label="E-mail (optionnel)"
+          <Text style={styles.label}>E-mail (optionnel)</Text>
+          <TextInput
+            style={styles.input}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          <Field
-            label="Mot de passe *"
+          <Text style={styles.label}>Mot de passe *</Text>
+          <TextInput
+            style={styles.input}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
           />
-          <Field label="Ville (optionnel)" value={ville} onChangeText={setVille} />
-          <Field
-            label="École / Université (optionnel)"
-            value={universite}
-            onChangeText={setUniversite}
+          <Text style={styles.label}>Ville (optionnel)</Text>
+          <TextInput style={styles.input} value={ville} onChangeText={setVille} />
+          <Text style={styles.label}>Tu es plutôt… (optionnel)</Text>
+          <TextInput
+            style={styles.input}
+            value={obsoActivite}
+            onChangeText={setObsoActivite}
+            placeholder="Ex. propriétaire, recruteur, particulier…"
+            placeholderTextColor={Theme.colors.muted}
           />
-          <Field label="Filière (optionnel)" value={filiere} onChangeText={setFiliere} />
-
-          <Text style={styles.label}>Niveau (optionnel)</Text>
-          <View style={styles.chips}>
-            {NIVEAUX.map((n) => (
-              <Pressable
-                key={n}
-                onPress={() => setNiveau(n)}
-                style={[styles.chip, niveau === n && styles.chipOn]}>
-                <Text style={[styles.chipText, niveau === n && styles.chipTextOn]}>{n}</Text>
-              </Pressable>
-            ))}
-          </View>
-
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <GlassButton
-            label="Créer mon compte SCHOOLER"
+            label="Créer mon compte OBSO"
             onPress={onSubmit}
             busy={busy}
             disabled={!canSubmit}
@@ -127,44 +114,20 @@ export default function RegisterSchoolerScreen() {
   );
 }
 
-function Field(props: {
-  label: string;
-  value: string;
-  onChangeText: (t: string) => void;
-  secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'phone-pad' | 'email-address';
-  autoCapitalize?: 'none' | 'sentences';
-}) {
-  return (
-    <>
-      <Text style={styles.label}>{props.label}</Text>
-      <TextInput
-        style={styles.input}
-        value={props.value}
-        onChangeText={props.onChangeText}
-        secureTextEntry={props.secureTextEntry}
-        keyboardType={props.keyboardType}
-        autoCapitalize={props.autoCapitalize ?? 'sentences'}
-        placeholderTextColor={Theme.colors.muted}
-      />
-    </>
-  );
-}
-
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: Theme.colors.background },
   content: { padding: Theme.spacing.md, paddingBottom: 48 },
   badge: {
     alignSelf: 'flex-start',
-    backgroundColor: Theme.colors.primarySoft,
+    backgroundColor: 'rgba(249,115,22,0.15)',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 999,
     marginBottom: 8,
   },
-  badgeText: { color: Theme.colors.primaryDark, fontWeight: '800', fontSize: 12 },
+  badgeText: { color: Theme.colors.orange, fontWeight: '800', fontSize: 12 },
   title: { fontSize: 22, fontWeight: '800', color: Theme.colors.text },
-  sub: { color: Theme.colors.muted, marginBottom: 16, marginTop: 4 },
+  sub: { color: Theme.colors.muted, marginBottom: 16, marginTop: 4, lineHeight: 20 },
   card: { ...Theme.glass, borderRadius: Theme.radius.lg, padding: Theme.spacing.md },
   label: { fontSize: 12, fontWeight: '700', color: Theme.colors.muted, marginTop: 10, marginBottom: 6 },
   input: {
@@ -177,17 +140,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Theme.colors.text,
   },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.55)',
-    borderWidth: 1,
-    borderColor: 'rgba(15,23,42,0.08)',
-  },
-  chipOn: { backgroundColor: Theme.colors.primary },
-  chipText: { fontWeight: '700', color: Theme.colors.text, fontSize: 13 },
-  chipTextOn: { color: '#fff' },
   error: { color: Theme.colors.danger, marginTop: 12, fontWeight: '600' },
 });

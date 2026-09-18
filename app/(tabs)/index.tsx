@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { ShortcutButton } from '@/components/ShortcutButton';
 import { Theme } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { resolveRole } from '@/data/profile';
+import { roleBadge } from '@/data/profile';
 import { universities } from '@/data/universities';
 
 type InfoBlock = {
@@ -38,8 +38,7 @@ export default function AccueilScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const prenom = user?.prenom ?? 'ami';
-  const role = resolveRole(user);
-  const roleBadge = role === 'visiteur' ? 'Visiteur' : 'Étudiant';
+  const badge = roleBadge(user);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -47,7 +46,7 @@ export default function AccueilScreen() {
         <View style={styles.heroTop}>
           <Text style={styles.greeting}>Bonjour, {prenom} 👋</Text>
           <View style={styles.roleBadge}>
-            <Text style={styles.roleBadgeText}>{roleBadge}</Text>
+            <Text style={styles.roleBadgeText}>{badge}</Text>
           </View>
         </View>
         <Text style={styles.sub}>Vie étudiante en Côte d’Ivoire</Text>
