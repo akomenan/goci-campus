@@ -1,0 +1,15 @@
+{
+  "name": "Goci Campus",
+  "short_name": "Goci Campus",
+  "lang": "fr",
+  "start_url": "/goci-campus/",
+  "scope": "/goci-campus/",
+  "display": "standalone",
+  "background_color": "#C2410C",
+  "theme_color": "#F97316",
+  "icons": [
+    { "src": "/goci-campus/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/goci-campus/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/goci-campus/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

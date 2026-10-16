@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /goci-campus/profil/
+Sitemap: https://akomenan.github.io/goci-campus/sitemap.xml

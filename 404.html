@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Goci Campus</title>
+<script>
+  // GitHub Pages ne connaît pas les adresses dynamiques (/logement/annonce/<id>…) :
+  // on recharge l'app avec le chemin demandé dans ?p=, que app/+html.tsx remet en place.
+  (function () {
+    var base = '/goci-campus';
+    var l = window.location;
+    if (l.pathname.indexOf(base + '/') !== 0) return;
+    var rest = l.pathname.slice(base.length);
+    if (rest === '/' || rest === '/index.html') return;
+    l.replace(base + '/?p=' + encodeURIComponent(rest + l.search) + l.hash);
+  })();
+</script>
+<style>
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+         background: #C2410C; color: #fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; text-align: center; }
+  a { color: #fff; font-weight: 700; }
+</style>
+</head>
+<body>
+  <main>
+    <p>Ouverture de Goci Campus…</p>
+    <p><a href="/goci-campus/">Aller à l’accueil</a></p>
+  </main>
+</body>
+</html>
